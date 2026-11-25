@@ -194,6 +194,7 @@ function gemini_(body) {
       }
     }
     if (code === 429 && tries < 3) { Utilities.sleep(30000); continue; }   // per-minute limit: wait and retry
+    if (code >= 500 && tries < 6) { Utilities.sleep(20000 * (tries + 1)); continue; }   // Gemini busy: wait and retry
     throw new Error('Gemini ' + code + ' (' + model + '): ' + text.slice(0, 300));
   }
   throw new Error('Gemini: no model worked');
