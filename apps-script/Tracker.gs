@@ -46,6 +46,7 @@ function onOpen() {
     .addItem('Run all prompts now', 'fullRun')
     .addItem('Turn off weekly schedule', 'turnOffSchedule')
     .addItem('Show status', 'showStatus')
+    .addItem('Reset model choice', 'resetModels')
     .addToUi();
 }
 
@@ -57,7 +58,7 @@ function saveKey() {
   ui.alert('Saved. Next: AEO Tracker → 2. Test run (10 prompts).');
 }
 
-function testRun() { startRun_(10, true); }
+function testRun() { ['CANDIDATES', 'MODEL_INDEX', 'MODEL', 'NO_SEARCH'].forEach(k => props.deleteProperty(k)); startRun_(10, true); }
 function fullRun() { startRun_(0, false); }
 
 function turnOnSchedule() {
@@ -75,7 +76,7 @@ function showStatus() {
   const s = JSON.parse(props.getProperty('RUN') || 'null');
   const msg = !s ? 'No run in progress.' :
     `Week ${s.week} run: ${s.next} of ${s.total} prompts done${s.done ? ' (finished)' : ''}.`;
-  SpreadsheetApp.getUi().alert(msg + '\nModel: ' + (props.getProperty('MODEL') || 'not picked yet') + '\nWeek 1 date: ' + (props.getProperty('WEEK1_DATE') || 'not set yet'));
+  SpreadsheetApp.getUi().alert(msg + '\nModel: ' + (props.getProperty('MODEL') || 'not picked yet') + (props.getProperty('NO_SEARCH') ? ' (no web search)' : '') + '\nWeek 1 date: ' + (props.getProperty('WEEK1_DATE') || 'not set yet'));
 }
 
 function weeklyRun() { startRun_(0, false); }
@@ -130,55 +131,91 @@ function runOne_(p, s) {
   }
   Utilities.sleep(CONFIG.delayMs);
   const sc = score_(answer, sources);
-  return [s.week, s.date, modelName_(false), p['Prompt ID'], p['Category'], p['Branded?'], p['Prompt'],
+  return [s.week, s.date, modelName_(), p['Prompt ID'], p['Category'], p['Branded?'], p['Prompt'],
     sc.mentioned, sc.cited, sc.rank, sc.top3, sc.recommended, sc.sentiment, sc.accurate, sc.inaccuracies,
     sc.citedUrls, sc.competitors.join(', '), sources.join(' ').slice(0, 4000), answer.slice(0, 45000), err];
 }
 
 // ---------------------------------------------------------------- gemini --
 
-function modelName_(refresh) {
-  if (CONFIG.model) return CONFIG.model;
-  let m = props.getProperty('MODEL');
-  if (m && !refresh) return m;
+// Free-plan Gemini access differs by model and changes often, so the script keeps a list
+// of candidate models and moves down it when Google says a model is not free.
+function candidates_() {
+  const cached = props.getProperty('CANDIDATES');
+  if (cached) return JSON.parse(cached);
   const res = UrlFetchApp.fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000',
     {headers: {'x-goog-api-key': props.getProperty('GEMINI_API_KEY')}, muteHttpExceptions: true});
   if (res.getResponseCode() !== 200) throw new Error('Gemini model list ' + res.getResponseCode() + ': ' + res.getContentText().slice(0, 300));
-  const bad = /lite|image|tts|live|audio|embed|thinking|exp|preview|learnlm|robotics|computer/i;
+  const bad = /image|tts|live|audio|embed|thinking|exp|preview|learnlm|robotics|computer|native/i;
   const names = (JSON.parse(res.getContentText()).models || [])
     .filter(x => (x.supportedGenerationMethods || []).indexOf('generateContent') >= 0)
     .map(x => x.name.replace('models/', ''))
     .filter(n => /^gemini-[\d.]+-flash/.test(n) && !bad.test(n));
-  // newest version first, e.g. gemini-3.0-flash before gemini-2.5-flash
-  names.sort((a, b) => parseFloat(b.split('-')[1]) - parseFloat(a.split('-')[1]) || a.length - b.length);
-  m = names[0] || 'gemini-flash-latest';
-  props.setProperty('MODEL', m);
-  return m;
+  const ver = n => parseFloat(n.split('-')[1]);
+  // full Flash models newest first, then Lite models newest first, then Google's aliases
+  names.sort((a, b) => (/lite/.test(a) - /lite/.test(b)) || ver(b) - ver(a) || a.length - b.length);
+  const list = Array.from(new Set((CONFIG.model ? [CONFIG.model] : []).concat(names, ['gemini-flash-latest', 'gemini-flash-lite-latest'])));
+  props.setProperty('CANDIDATES', JSON.stringify(list));
+  return list;
 }
 
-function gemini_(body, retried) {
-  const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + modelName_(false) + ':generateContent';
-  const res = UrlFetchApp.fetch(url, {
-    method: 'post', contentType: 'application/json', muteHttpExceptions: true,
-    headers: {'x-goog-api-key': props.getProperty('GEMINI_API_KEY')},
-    payload: JSON.stringify(body),
-  });
-  if (res.getResponseCode() === 404 && !retried) { modelName_(true); return gemini_(body, true); }
-  if (res.getResponseCode() !== 200) throw new Error('Gemini ' + res.getResponseCode() + ': ' + res.getContentText().slice(0, 300));
-  return JSON.parse(res.getContentText());
+function modelName_() {
+  const list = candidates_();
+  const i = Number(props.getProperty('MODEL_INDEX') || 0);
+  return list[Math.min(i, list.length - 1)];
+}
+
+function nextModel_() {
+  const list = candidates_();
+  const i = Number(props.getProperty('MODEL_INDEX') || 0) + 1;
+  if (i >= list.length) return false;
+  props.setProperty('MODEL_INDEX', String(i));
+  props.setProperty('MODEL', list[i]);
+  return true;
+}
+
+function gemini_(body) {
+  for (let tries = 0; tries < 40; tries++) {
+    const model = modelName_();
+    props.setProperty('MODEL', model);
+    const res = UrlFetchApp.fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent', {
+      method: 'post', contentType: 'application/json', muteHttpExceptions: true,
+      headers: {'x-goog-api-key': props.getProperty('GEMINI_API_KEY')},
+      payload: JSON.stringify(body),
+    });
+    const code = res.getResponseCode(), text = res.getContentText();
+    if (code === 200) return JSON.parse(text);
+    const notFree = code === 404 || code === 403 || (code === 429 && /limit:\s*0\b|billing|plan/i.test(text) && !/per.?minute/i.test(text));
+    if (notFree) {
+      if (nextModel_()) continue;
+      // Every model refused with web search on: carry on without search as a last resort.
+      if (body.tools && !props.getProperty('NO_SEARCH')) {
+        props.setProperty('NO_SEARCH', '1'); props.setProperty('MODEL_INDEX', '0'); continue;
+      }
+    }
+    if (code === 429 && tries < 3) { Utilities.sleep(30000); continue; }   // per-minute limit: wait and retry
+    throw new Error('Gemini ' + code + ' (' + model + '): ' + text.slice(0, 300));
+  }
+  throw new Error('Gemini: no model worked');
+}
+
+function resetModels() {
+  ['CANDIDATES', 'MODEL_INDEX', 'MODEL', 'NO_SEARCH'].forEach(k => props.deleteProperty(k));
+  SpreadsheetApp.getUi().alert('Model choice reset. The next run will look for a free Gemini model again.');
 }
 
 function askGemini_(prompt) {
   const d = gemini_({
     systemInstruction: {parts: [{text: CONFIG.systemHint}]},
     contents: [{role: 'user', parts: [{text: prompt}]}],
-    tools: [{google_search: {}}],
+    tools: props.getProperty('NO_SEARCH') ? undefined : [{google_search: {}}],
   });
   const cand = (d.candidates || [{}])[0];
   const text = ((cand.content || {}).parts || []).map(x => x.text || '').join('');
   // Gemini gives redirect links; the title holds the real site name.
   const sources = (((cand.groundingMetadata || {}).groundingChunks) || [])
     .map(c => (c.web && (c.web.title || c.web.uri)) || '').filter(String);
+  if (props.getProperty('NO_SEARCH')) sources.unshift('[answered without web search]');
   return [text, sources];
 }
 
