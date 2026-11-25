@@ -2,11 +2,15 @@
 
 1. **GitHub repo**: create an empty *private* repository and upload this folder
    (tracker.py, requirements.txt, .github/workflows/weekly.yml).
-2. **Google access for the script**: in Google Cloud Console create a service
-   account, enable the Google Sheets API, download its JSON key. Share the
-   prompt sheet with the service account's email as Editor.
+2. **Google Sheet access (easy way, no Google Cloud)**: open the tracker sheet →
+   Extensions → Apps Script. Replace the code with `sheet_connector.gs`, change
+   `CHANGE-ME` to a long random password, save. Deploy → New deployment → type
+   *Web app*, Execute as *Me*, Who has access *Anyone* → Deploy → allow access.
+   Copy the Web app URL. Add GitHub secrets SHEET_WEBHOOK_URL (the URL) and
+   SHEET_TOKEN (the same password). (Alternative: a Google service account,
+   secret GOOGLE_SERVICE_ACCOUNT_JSON.)
 3. **Secrets** (repo → Settings → Secrets and variables → Actions → New secret):
-   GOOGLE_SERVICE_ACCOUNT_JSON (whole JSON file), and whichever of
+   the sheet secrets from step 2, and whichever of
    OPENAI_API_KEY, GEMINI_API_KEY, ANTHROPIC_API_KEY, PERPLEXITY_API_KEY,
    XAI_API_KEY, SERPAPI_API_KEY you have. Missing ones are skipped.
 4. **Variables** (same page, Variables tab): SHEET_ID (optional, defaults to the

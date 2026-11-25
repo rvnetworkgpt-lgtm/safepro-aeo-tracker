@@ -307,6 +307,28 @@ SCORE_COLS = ["Week", "Run date", "Engine", "Prompts run", "Mention rate", "Cita
               "Entity accuracy", "Positive", "Neutral", "Negative", "Non-branded mention rate"]
 
 
+class WebhookSheet:
+    """Writes through the Apps Script web app (sheet_connector.gs). No Google Cloud setup needed."""
+    def __init__(self, url, token):
+        self.url, self.token = url, token
+
+    def prompts(self):
+        r = requests.get(self.url, params={"token": self.token}, timeout=120)
+        r.raise_for_status()
+        d = r.json()
+        if "error" in d:
+            raise RuntimeError(f"Sheet connector: {d['error']}")
+        return [p for p in d["prompts"] if str(p.get("Active", "Yes")).strip().lower() != "no"]
+
+    def append(self, tab_name, cols, rows):
+        for i in range(0, len(rows), 200):
+            r = requests.post(self.url, json={"token": self.token, "tab": tab_name, "cols": cols,
+                                              "rows": rows[i:i + 200]}, timeout=300)
+            r.raise_for_status()
+            if "error" in r.json():
+                raise RuntimeError(f"Sheet connector: {r.json()['error']}")
+
+
 def open_sheet():
     import gspread
     info = json.loads(os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"])
@@ -369,8 +391,11 @@ def main():
     today = dt.date.today()
     week, run_date = week_number(today), today.isoformat()
 
-    book = None
-    if args.prompts_csv:
+    book = hook = None
+    if os.environ.get("SHEET_WEBHOOK_URL") and not args.prompts_csv:
+        hook = WebhookSheet(os.environ["SHEET_WEBHOOK_URL"], os.environ.get("SHEET_TOKEN", ""))
+        prompts = hook.prompts()
+    elif args.prompts_csv:
         import csv
         with open(args.prompts_csv, newline="", encoding="utf-8") as f:
             prompts = [r for r in csv.DictReader(f) if r.get("Active", "Yes").lower() != "no"]
@@ -415,7 +440,11 @@ def main():
                         s["competitors"], s["all_urls"], answer[:45000], err])
             print(f"  {engine:15} {p['Prompt ID']} mentioned={s['mentioned']!s:5} cited={s['cited']!s:5} {err[:80]}")
         summary = summarise(week, run_date, engine, rows)
-        if results_ws:
+        if hook and not args.dry_run:
+            hook.append("Results", RESULT_COLS, out)
+            if summary:
+                hook.append("Scores", SCORE_COLS, [summary])
+        elif results_ws:
             results_ws.append_rows(out, value_input_option="RAW")
             if summary:
                 scores_ws.append_row(summary, value_input_option="RAW")

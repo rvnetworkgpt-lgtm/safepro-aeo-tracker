@@ -27,6 +27,8 @@ jobs:
           SHEET_ID: ${{ vars.SHEET_ID }}
           WEEK1_DATE: ${{ vars.WEEK1_DATE }}
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          SHEET_WEBHOOK_URL: ${{ secrets.SHEET_WEBHOOK_URL }}
+          SHEET_TOKEN: ${{ secrets.SHEET_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
