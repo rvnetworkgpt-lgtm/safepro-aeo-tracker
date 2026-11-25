@@ -13,7 +13,7 @@
  */
 
 const CONFIG = {
-  model: 'gemini-2.5-flash',
+  model: '',               // blank = pick Google's newest free Flash model automatically
   brandRegex: /\bsafe\s*-?\s*pro\b/i,
   brandDomain: 'safeprofire.com',
   competitors: ['Ceasefire', 'Safex', 'Kanex', 'Minimax', 'Supremex', 'New Age',
@@ -75,7 +75,7 @@ function showStatus() {
   const s = JSON.parse(props.getProperty('RUN') || 'null');
   const msg = !s ? 'No run in progress.' :
     `Week ${s.week} run: ${s.next} of ${s.total} prompts done${s.done ? ' (finished)' : ''}.`;
-  SpreadsheetApp.getUi().alert(msg + '\nWeek 1 date: ' + (props.getProperty('WEEK1_DATE') || 'not set yet'));
+  SpreadsheetApp.getUi().alert(msg + '\nModel: ' + (props.getProperty('MODEL') || 'not picked yet') + '\nWeek 1 date: ' + (props.getProperty('WEEK1_DATE') || 'not set yet'));
 }
 
 function weeklyRun() { startRun_(0, false); }
@@ -130,20 +130,40 @@ function runOne_(p, s) {
   }
   Utilities.sleep(CONFIG.delayMs);
   const sc = score_(answer, sources);
-  return [s.week, s.date, 'gemini', p['Prompt ID'], p['Category'], p['Branded?'], p['Prompt'],
+  return [s.week, s.date, modelName_(false), p['Prompt ID'], p['Category'], p['Branded?'], p['Prompt'],
     sc.mentioned, sc.cited, sc.rank, sc.top3, sc.recommended, sc.sentiment, sc.accurate, sc.inaccuracies,
     sc.citedUrls, sc.competitors.join(', '), sources.join(' ').slice(0, 4000), answer.slice(0, 45000), err];
 }
 
 // ---------------------------------------------------------------- gemini --
 
-function gemini_(body) {
-  const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + CONFIG.model + ':generateContent';
+function modelName_(refresh) {
+  if (CONFIG.model) return CONFIG.model;
+  let m = props.getProperty('MODEL');
+  if (m && !refresh) return m;
+  const res = UrlFetchApp.fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000',
+    {headers: {'x-goog-api-key': props.getProperty('GEMINI_API_KEY')}, muteHttpExceptions: true});
+  if (res.getResponseCode() !== 200) throw new Error('Gemini model list ' + res.getResponseCode() + ': ' + res.getContentText().slice(0, 300));
+  const bad = /lite|image|tts|live|audio|embed|thinking|exp|preview|learnlm|robotics|computer/i;
+  const names = (JSON.parse(res.getContentText()).models || [])
+    .filter(x => (x.supportedGenerationMethods || []).indexOf('generateContent') >= 0)
+    .map(x => x.name.replace('models/', ''))
+    .filter(n => /^gemini-[\d.]+-flash/.test(n) && !bad.test(n));
+  // newest version first, e.g. gemini-3.0-flash before gemini-2.5-flash
+  names.sort((a, b) => parseFloat(b.split('-')[1]) - parseFloat(a.split('-')[1]) || a.length - b.length);
+  m = names[0] || 'gemini-flash-latest';
+  props.setProperty('MODEL', m);
+  return m;
+}
+
+function gemini_(body, retried) {
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + modelName_(false) + ':generateContent';
   const res = UrlFetchApp.fetch(url, {
     method: 'post', contentType: 'application/json', muteHttpExceptions: true,
     headers: {'x-goog-api-key': props.getProperty('GEMINI_API_KEY')},
     payload: JSON.stringify(body),
   });
+  if (res.getResponseCode() === 404 && !retried) { modelName_(true); return gemini_(body, true); }
   if (res.getResponseCode() !== 200) throw new Error('Gemini ' + res.getResponseCode() + ': ' + res.getContentText().slice(0, 300));
   return JSON.parse(res.getContentText());
 }
