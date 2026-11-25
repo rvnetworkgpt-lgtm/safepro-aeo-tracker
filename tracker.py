@@ -245,7 +245,26 @@ FACTS = ("Safe Pro Fire Services Pvt. Ltd.: fire-safety equipment manufacturer, 
          "categories; branches across 16 Indian states; website safeprofire.com.")
 
 
+def judge_prompt(answer):
+    return (f"Verified facts about the brand:\n{FACTS}\n\nAI answer to score:\n<answer>\n{answer[:12000]}\n</answer>\n\n"
+            "How does this answer portray Safe Pro (sentiment)? Does it recommend Safe Pro? "
+            "Are its statements about Safe Pro consistent with the verified facts? List any inaccuracies briefly, or ''.")
+
+
+def judge_gemini(answer):
+    """Free option: score with Gemini (structured JSON output)."""
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{MODELS['gemini']}:generateContent"
+    schema = {k: v for k, v in JUDGE_SCHEMA.items() if k != "additionalProperties"}
+    body = {"contents": [{"role": "user", "parts": [{"text": judge_prompt(answer)}]}],
+            "generationConfig": {"responseMimeType": "application/json", "responseSchema": schema}}
+    r = requests.post(url, params={"key": os.environ["GEMINI_API_KEY"]}, json=body, timeout=120)
+    r.raise_for_status()
+    return json.loads(r.json()["candidates"][0]["content"]["parts"][0]["text"])
+
+
 def judge(answer):
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        return judge_gemini(answer)
     import anthropic
     client = anthropic.Anthropic()
     msg = client.messages.create(
@@ -253,9 +272,7 @@ def judge(answer):
         max_tokens=1024,
         output_config={"effort": "low", "format": {"type": "json_schema", "schema": JUDGE_SCHEMA}},
         messages=[{"role": "user", "content":
-                   f"Verified facts about the brand:\n{FACTS}\n\nAI answer to score:\n<answer>\n{answer[:12000]}\n</answer>\n\n"
-                   "How does this answer portray Safe Pro (sentiment)? Does it recommend Safe Pro? "
-                   "Are its statements about Safe Pro consistent with the verified facts? List any inaccuracies briefly, or ''."}],
+                   judge_prompt(answer)}],
     )
     text = next(b.text for b in msg.content if b.type == "text")
     return json.loads(text)
@@ -268,7 +285,7 @@ def score(answer, urls):
     cited = [u for u in urls if BRAND_DOMAIN in u]
     rank, competitors = rank_of_brand(answer)
     j = {"sentiment": "", "recommended": False, "accurate": "", "inaccuracies": ""}
-    if mentioned and os.environ.get("ANTHROPIC_API_KEY"):
+    if mentioned and (os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("GEMINI_API_KEY")):
         try:
             j = judge(answer)
         except Exception as e:  # scoring must never stop the run
@@ -381,6 +398,8 @@ def main():
             for attempt in range(3):
                 try:
                     answer, urls = fn(p["Prompt"])
+                    if engine == "gemini":
+                        time.sleep(float(os.environ.get("GEMINI_DELAY", "7")))  # stay under free-tier per-minute limit
                     err = ""
                     break
                 except Exception as e:

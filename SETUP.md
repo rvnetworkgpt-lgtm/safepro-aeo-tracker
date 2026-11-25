@@ -15,5 +15,5 @@
    Check the Results and Scores tabs in the sheet.
 6. After that it runs itself every Monday at 9:00 AM IST.
 
-Notes: ANTHROPIC_API_KEY is also used to score tone and accuracy of answers
+Notes: answers that mention Safe Pro are scored for tone and accuracy with Claude if ANTHROPIC_API_KEY is set, otherwise free with Gemini (GEMINI_API_KEY).
 that mention Safe Pro. Edit COMPETITORS and model names at the top of tracker.py.
