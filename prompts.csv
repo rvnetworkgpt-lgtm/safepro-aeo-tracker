@@ -1,0 +1,101 @@
+Prompt ID,Category,Branded?,Prompt,Active
+P001,About Safe Pro,Branded,What is Safe Pro Fire Services?,Yes
+P002,About Safe Pro,Branded,Is Safe Pro Fire Services a manufacturer or a dealer?,Yes
+P003,About Safe Pro,Branded,Where is Safe Pro Fire Services located?,Yes
+P004,About Safe Pro,Branded,Is Safe Pro a reliable fire extinguisher brand in India?,Yes
+P005,About Safe Pro,Branded,What products does Safe Pro Fire manufacture?,Yes
+P006,About Safe Pro,Branded,Safe Pro Fire Services reviews,Yes
+P007,About Safe Pro,Branded,Are Safe Pro fire extinguishers ISI marked?,Yes
+P008,About Safe Pro,Branded,When was Safe Pro Fire Services established?,Yes
+P009,About Safe Pro,Branded,Does Safe Pro Fire Services have branches outside Mumbai?,Yes
+P010,About Safe Pro,Branded,How does Safe Pro Fire compare with other Indian fire extinguisher brands?,Yes
+P011,Fire extinguishers,Non-branded,Who are leading fire extinguisher manufacturers in India?,Yes
+P012,Fire extinguishers,Non-branded,Which companies manufacture lithium-ion fire extinguishers in India?,Yes
+P013,Fire extinguishers,Non-branded,Best extinguisher for lithium-ion battery fires,Yes
+P014,Fire extinguishers,Non-branded,Best ABC fire extinguisher brand in India,Yes
+P015,Fire extinguishers,Non-branded,ISI marked 6 kg ABC fire extinguisher manufacturer in India,Yes
+P016,Fire extinguishers,Non-branded,CO2 fire extinguisher manufacturers in India,Yes
+P017,Fire extinguishers,Non-branded,Clean agent fire extinguisher manufacturers in India,Yes
+P018,Fire extinguishers,Non-branded,Best kitchen fire extinguisher for restaurants in India,Yes
+P019,Fire extinguishers,Non-branded,Which companies make wet chemical (Class K) fire extinguishers in India?,Yes
+P020,Fire extinguishers,Non-branded,Modular automatic fire extinguisher manufacturers in India,Yes
+P021,Fire extinguishers,Non-branded,Trolley mounted 50 kg fire extinguisher manufacturer in India,Yes
+P022,Fire extinguishers,Non-branded,Water mist fire extinguisher manufacturers in India,Yes
+P023,Fire extinguishers,Non-branded,Best fire extinguisher for home use in India,Yes
+P024,Fire extinguishers,Non-branded,Best fire extinguisher for cars in India,Yes
+P025,Fire extinguishers,Non-branded,Mechanical foam fire extinguisher manufacturer in India,Yes
+P026,Fire extinguishers,Non-branded,Which fire extinguisher should be used for electrical panels?,Yes
+P027,Fire extinguishers,Non-branded,Stainless steel fire extinguisher manufacturers in India,Yes
+P028,Fire extinguishers,Non-branded,Which fire extinguisher brands in India have BIS certification?,Yes
+P029,Fire extinguishers,Non-branded,Do automatic fire extinguisher balls work and who makes them in India?,Yes
+P030,Fire extinguishers,Non-branded,Best fire extinguisher for offices in India,Yes
+P031,Fire systems,Non-branded,Who supplies complete fire protection systems in India?,Yes
+P032,Fire systems,Non-branded,Companies supplying fire hydrant systems in India,Yes
+P033,Fire systems,Non-branded,Fire suppression system manufacturers in India,Yes
+P034,Fire systems,Non-branded,Kitchen fire suppression system suppliers in India,Yes
+P035,Fire systems,Non-branded,Fire alarm and detection system companies in India,Yes
+P036,Fire systems,Non-branded,Fire hydrant valve manufacturers in India,Yes
+P037,Fire systems,Non-branded,Fire hose reel manufacturers in India,Yes
+P038,Fire systems,Non-branded,Fire sprinkler system installation companies in India,Yes
+P039,Fire systems,Non-branded,Clean agent (FM-200 / Novec 1230) suppression system suppliers in India,Yes
+P040,Fire systems,Non-branded,CO2 flooding system suppliers in India,Yes
+P041,Fire systems,Non-branded,Tube-based fire suppression system for electrical panels manufacturers in India,Yes
+P042,Fire systems,Non-branded,Fire hose and coupling manufacturers in India,Yes
+P043,Fire systems,Non-branded,Fire safety equipment AMC and maintenance companies in India,Yes
+P044,Fire systems,Non-branded,How much does a fire hydrant system cost for a factory in India?,Yes
+P045,Fire systems,Non-branded,Automatic fire suppression system for server rooms in India,Yes
+P046,Industries and uses,Non-branded,Best fire extinguisher for data centres in India,Yes
+P047,Industries and uses,Non-branded,Fire protection solution for pharmaceutical factories,Yes
+P048,Industries and uses,Non-branded,Fire suppression systems for commercial kitchens India,Yes
+P049,Industries and uses,Non-branded,Fire protection for EV battery storage,Yes
+P050,Industries and uses,Non-branded,Which fire extinguisher is suitable for server rooms?,Yes
+P051,Industries and uses,Non-branded,Which fire extinguisher should be installed at an EV charging station in India?,Yes
+P052,Industries and uses,Non-branded,Fire safety equipment for warehouses in India,Yes
+P053,Industries and uses,Non-branded,Fire safety requirements for hospitals in India,Yes
+P054,Industries and uses,Non-branded,Fire safety equipment for hotels in India,Yes
+P055,Industries and uses,Non-branded,Fire safety equipment for schools and colleges in India,Yes
+P056,Industries and uses,Non-branded,Fire safety equipment for shopping malls in India,Yes
+P057,Industries and uses,Non-branded,Fire safety for residential housing societies in India,Yes
+P058,Industries and uses,Non-branded,Fire safety equipment for banks and ATMs in India,Yes
+P059,Industries and uses,Non-branded,Fire protection for factories and manufacturing plants in India,Yes
+P060,Industries and uses,Non-branded,Fire protection for battery energy storage systems at solar plants in India,Yes
+P061,Industries and uses,Non-branded,Fire safety equipment for chemical plants in India,Yes
+P062,Industries and uses,Non-branded,Which fire extinguishers are required at a petrol pump in India?,Yes
+P063,Industries and uses,Non-branded,Fire safety equipment for cold storage facilities in India,Yes
+P064,Industries and uses,Non-branded,Fire extinguishers for textile mills in India,Yes
+P065,Industries and uses,Non-branded,Fire protection for transformer rooms and electrical substations in India,Yes
+P066,Comparisons,Non-branded,ABC vs CO2 extinguisher,Yes
+P067,Comparisons,Non-branded,Water mist vs ABC fire extinguisher,Yes
+P068,Comparisons,Non-branded,Clean agent vs CO2 fire extinguisher,Yes
+P069,Comparisons,Non-branded,Portable vs modular fire extinguisher,Yes
+P070,Comparisons,Non-branded,Fire suppression system vs sprinkler system,Yes
+P071,Comparisons,Non-branded,Fire hydrant vs sprinkler system,Yes
+P072,Comparisons,Non-branded,Wet chemical vs ABC extinguisher for kitchen fires,Yes
+P073,Comparisons,Non-branded,Fire suppression system vs fire extinguisher: which do I need?,Yes
+P074,Comparisons,Non-branded,Difference between fire alarm and fire detection system,Yes
+P075,Comparisons,Non-branded,Stored pressure vs cartridge type fire extinguisher,Yes
+P076,Local,Non-branded,Fire safety equipment manufacturers Mumbai,Yes
+P077,Local,Non-branded,Fire extinguisher manufacturer in Mumbai,Yes
+P078,Local,Non-branded,Fire extinguisher supplier near Kurla Mumbai,Yes
+P079,Local,Non-branded,Fire safety supplier Bangalore,Yes
+P080,Local,Non-branded,Fire extinguisher supplier Hyderabad,Yes
+P081,Local,Non-branded,Fire extinguisher dealers in Pune,Yes
+P082,Local,Non-branded,Fire safety equipment suppliers in Ahmedabad,Yes
+P083,Local,Non-branded,Fire extinguisher suppliers in Chennai,Yes
+P084,Local,Non-branded,Fire safety company in Kolkata,Yes
+P085,Local,Non-branded,Fire safety equipment supplier in Nagpur,Yes
+P086,Standards and rules,Non-branded,What are the BIS standards for fire extinguishers in India?,Yes
+P087,Standards and rules,Non-branded,What does IS 15683 cover for portable fire extinguishers?,Yes
+P088,Standards and rules,Non-branded,How many fire extinguishers are required for a factory in India?,Yes
+P089,Standards and rules,Non-branded,How often should fire extinguishers be refilled in India?,Yes
+P090,Standards and rules,Non-branded,Fire extinguisher hydrostatic pressure testing requirements in India,Yes
+P091,Standards and rules,Non-branded,NBC 2016 fire safety requirements for commercial buildings,Yes
+P092,Standards and rules,Non-branded,Fire NOC requirements in Maharashtra,Yes
+P093,Standards and rules,Non-branded,Fire extinguisher inspection checklist India,Yes
+P094,Standards and rules,Non-branded,What does a 2A 55B rating on a fire extinguisher mean?,Yes
+P095,Standards and rules,Non-branded,Can a CO2 extinguisher be used on lithium-ion battery fires?,Yes
+P096,Choosing a supplier,Non-branded,Which Indian companies manufacture fire safety equipment?,Yes
+P097,Choosing a supplier,Non-branded,Best industrial fire safety manufacturers India,Yes
+P098,Choosing a supplier,Non-branded,Bulk fire extinguisher supplier for corporate offices in India,Yes
+P099,Choosing a supplier,Non-branded,How to choose a fire extinguisher supplier in India,Yes
+P100,Choosing a supplier,Non-branded,Fire safety equipment manufacturer in India with BIS and CE certification,Yes
